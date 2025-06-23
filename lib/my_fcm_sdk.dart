@@ -9,6 +9,10 @@ class MyFcmSdk {
   static final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
+  static String? _fcmToken;
+
+  static String? get fcmToken => _fcmToken;
+
   static Future<void> initializeFCM() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
@@ -26,13 +30,16 @@ class MyFcmSdk {
       print('🚀 App opened via notification: ${message.notification?.title}');
     });
 
-    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance
+        .getInitialMessage();
     if (initialMessage != null) {
-      print('🧊 Launched from terminated state: ${initialMessage.notification?.title}');
+      print(
+        '🧊 Launched from terminated state: ${initialMessage.notification?.title}',
+      );
     }
 
-    String? token = await FirebaseMessaging.instance.getToken();
-    print("🔥 FCM Token: $token");
+    _fcmToken = await FirebaseMessaging.instance.getToken();
+    print("🔥 FCM Token: $_fcmToken");
   }
 
   static Future<void> _requestNotificationPermissions() async {
@@ -49,7 +56,8 @@ class MyFcmSdk {
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
+    const DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings();
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
@@ -64,16 +72,18 @@ class MyFcmSdk {
     AndroidNotification? android = message.notification?.android;
 
     if (notification != null && android != null) {
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'default_channel',
-        'Default',
-        importance: Importance.max,
-        priority: Priority.high,
-        showWhen: true,
-      );
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+            'default_channel',
+            'Default',
+            importance: Importance.max,
+            priority: Priority.high,
+            showWhen: true,
+          );
 
-      const NotificationDetails platformDetails =
-          NotificationDetails(android: androidDetails);
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+      );
 
       _localNotifications.show(
         notification.hashCode,
@@ -84,7 +94,9 @@ class MyFcmSdk {
     }
   }
 
-  static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  static Future<void> _firebaseMessagingBackgroundHandler(
+    RemoteMessage message,
+  ) async {
     await Firebase.initializeApp();
     print('📡 Background message: ${message.messageId}');
   }
